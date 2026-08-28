@@ -17,12 +17,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: 24
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -31,11 +32,11 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Smoke Tests
-        run: npm run test:smoke
+        run: npm run test: smoke
 
       - name: Upload Smoke Report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: smoke-report
           path: playwright-report/
