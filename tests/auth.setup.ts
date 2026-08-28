@@ -1,0 +1,17 @@
+import { test as setup } from '@playwright/test';
+
+setup('authenticate', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByPlaceholder('Username').fill('standard_user');
+
+  await page.getByPlaceholder('Password').fill('secret_sauce');
+
+  await page.getByRole('button', {
+    name: 'Login',
+  }).click();
+
+  await page.context().storageState({
+    path: 'playwright/.auth/user.json',
+  });
+});
