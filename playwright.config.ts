@@ -6,47 +6,55 @@ dotenv.config();
 export default defineConfig({
   testDir: './tests',
 
-  timeout: 30_000,
-
+  /* Test execution */
+  timeout: 30000,
   expect: {
-    timeout: 5_000,
+    timeout: 5000,
   },
 
+  /* Run tests in parallel */
   fullyParallel: true,
 
-  retries: 0,
+  /* Retry only in CI */
+  retries: process.env.CI ? 2 : 0,
 
-  workers: 1,
+  /* One worker in CI for stability */
+  workers: process.env.CI ? 1 : undefined,
 
-  reporter: 'html',
+  /* Reports */
+  reporter: [
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['junit', { outputFile: 'test-results/results.xml' }],
+  ],
 
+  /* Shared settings */
   use: {
     baseURL: process.env.BASE_URL,
-
-    testIdAttribute: 'data-test',
 
     headless: true,
 
     screenshot: 'only-on-failure',
-
     video: 'retain-on-failure',
-
     trace: 'on-first-retry',
+
+    /* SauceDemo uses data-test instead of data-testid */
+    testIdAttribute: 'data-test',
   },
 
-projects: [
-  {
-    name: 'setup',
-    testMatch: /auth\.setup\.ts/,
-  },
-
-  {
-    name: 'chromium',
-    use: {
-      ...devices['Desktop Chrome'],
-      storageState: 'playwright/.auth/user.json',
+  /* Projects */
+  projects: [
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
     },
-    dependencies: ['setup'],
-  },
-],
+
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/user.json',
+      },
+      dependencies: ['setup'],
+    },
+  ],
 });

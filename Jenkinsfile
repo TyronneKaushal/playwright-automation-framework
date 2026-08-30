@@ -30,6 +30,12 @@ pipeline {
             }
         }
 
+        stage('Prepare Test Results') {
+            steps {
+                bat 'if not exist test-results mkdir test-results'
+            }
+        }
+
         stage('Install Playwright Browsers') {
             steps {
                 bat 'npx playwright install'
@@ -42,7 +48,7 @@ pipeline {
             }
         }
 
-        stage('Verify Test Results') {
+        stage('Verify JUnit Report') {
             steps {
                 bat 'dir test-results'
                 bat 'if exist test-results\\results.xml (echo JUnit XML found) else (echo JUnit XML NOT FOUND & exit /b 1)'
@@ -52,6 +58,7 @@ pipeline {
 
     post {
         always {
+
             junit(
                 testResults: 'test-results/results.xml',
                 allowEmptyResults: false
