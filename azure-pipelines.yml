@@ -15,7 +15,7 @@ steps:
 - task: UseNode@1
   displayName: 'Install Node.js'
   inputs:
-    versionSpec: '24.x'
+    version: '24.x'
 
 - script: |
     node --version
@@ -31,9 +31,9 @@ steps:
 - script: npm test
   displayName: 'Run Playwright tests'
 
-- task: PublishPipelineArtifact@0
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Playwright report'
   condition: always()
   inputs:
     targetPath: 'playwright-report'
-    artifactName: 'playwright-report'
+    artifact: 'playwright-report'
