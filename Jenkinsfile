@@ -41,11 +41,21 @@ pipeline {
                 bat 'npm test'
             }
         }
+
+        stage('Verify Test Results') {
+            steps {
+                bat 'dir test-results'
+                bat 'if exist test-results\\results.xml (echo JUnit XML found) else (echo JUnit XML NOT FOUND & exit /b 1)'
+            }
+        }
     }
 
     post {
         always {
-            junit 'test-results/results.xml'
+            junit(
+                testResults: 'test-results/results.xml',
+                allowEmptyResults: false
+            )
 
             archiveArtifacts(
                 artifacts: 'playwright-report/**',
