@@ -1,0 +1,39 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  BASE_URL: 'https://www.saucedemo.com'
+
+steps:
+
+- checkout: self
+  displayName: 'Checkout repository'
+
+- task: NodeTool@0
+  displayName: 'Install Node.js'
+  inputs:
+    versionSpec: '24.x'
+
+- script: |
+    node --version
+    npm --version
+  displayName: 'Verify Node.js and npm'
+
+- script: npm ci
+  displayName: 'Install dependencies'
+
+- script: npx playwright install --with-deps
+  displayName: 'Install Playwright browsers'
+
+- script: npm test
+  displayName: 'Run Playwright tests'
+
+- task: PublishPipelineArtifact@0
+  displayName: 'Publish Playwright report'
+  condition: always()
+  inputs:
+    targetPath: 'playwright-report'
+    artifactName: 'playwright-report'
