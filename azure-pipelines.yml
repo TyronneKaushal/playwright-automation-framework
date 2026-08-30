@@ -1,39 +1,82 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
-
 variables:
   BASE_URL: 'https://www.saucedemo.com'
 
-steps:
+jobs:
 
-- checkout: self
-  displayName: 'Checkout repository'
+- job: Smoke
+  displayName: 'Smoke Tests'
 
-- task: UseNode@1
-  displayName: 'Install Node.js'
-  inputs:
-    version: '24.x'
+  pool:
+    vmImage: 'ubuntu-latest'
 
-- script: |
-    node --version
-    npm --version
-  displayName: 'Verify Node.js and npm'
+  steps:
 
-- script: npm ci
-  displayName: 'Install dependencies'
+  - checkout: self
+    displayName: 'Checkout repository'
 
-- script: npx playwright install --with-deps
-  displayName: 'Install Playwright browsers'
+  - task: UseNode@1
+    displayName: 'Install Node.js'
+    inputs:
+      version: '24.x'
 
-- script: npm test
-  displayName: 'Run Playwright tests'
+  - script: |
+      node --version
+      npm --version
+    displayName: 'Verify Node.js and npm'
 
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish Playwright report'
-  condition: always()
-  inputs:
-    targetPath: 'playwright-report'
-    artifact: 'playwright-report'
+  - script: npm ci
+    displayName: 'Install dependencies'
+
+  - script: npx playwright install --with-deps
+    displayName: 'Install Playwright browsers'
+
+  - script: npm run test:smoke
+    displayName: 'Run Smoke Tests'
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Smoke Report'
+    condition: always()
+    inputs:
+      targetPath: 'playwright-report'
+      artifact: 'smoke-report'
+
+
+- job: Regression
+  displayName: 'Regression Tests'
+
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+
+  - checkout: self
+    displayName: 'Checkout repository'
+
+  - task: UseNode@1
+    displayName: 'Install Node.js'
+    inputs:
+      version: '24.x'
+
+  - script: |
+      node --version
+      npm --version
+    displayName: 'Verify Node.js and npm'
+
+  - script: npm ci
+    displayName: 'Install dependencies'
+
+  - script: npx playwright install --with-deps
+    displayName: 'Install Playwright browsers'
+
+  - script: npm run test:regression
+    displayName: 'Run Regression Tests'
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Regression Report'
+    condition: always()
+    inputs:
+      targetPath: 'playwright-report'
+      artifact: 'regression-report'
