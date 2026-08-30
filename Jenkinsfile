@@ -5,6 +5,14 @@ pipeline {
         nodejs 'Node24'
     }
 
+    parameters {
+        choice(
+            name: 'TEST_SUITE',
+            choices: ['Smoke', 'Regression', 'All'],
+            description: 'Choose which Playwright suite to run'
+        )
+    }
+
     environment {
         BASE_URL = 'https://www.saucedemo.com'
     }
@@ -44,14 +52,36 @@ pipeline {
 
         stage('Run Playwright Tests') {
             steps {
-                bat 'npm test'
+                script {
+
+                    if (params.TEST_SUITE == 'Smoke') {
+
+                        bat 'npm run test:smoke'
+
+                    } else if (params.TEST_SUITE == 'Regression') {
+
+                        bat 'npm run test:regression'
+
+                    } else {
+
+                        bat 'npm test'
+                    }
+                }
             }
         }
 
         stage('Verify JUnit Report') {
             steps {
                 bat 'dir test-results'
-                bat 'if exist test-results\\results.xml (echo JUnit XML found) else (echo JUnit XML NOT FOUND & exit /b 1)'
+
+                bat '''
+                    if exist test-results\\results.xml (
+                        echo JUnit XML found
+                    ) else (
+                        echo JUnit XML NOT FOUND
+                        exit /b 1
+                    )
+                '''
             }
         }
     }
