@@ -45,8 +45,17 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
-            archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
+            junit 'test-results/results.xml'
+
+            archiveArtifacts(
+                artifacts: 'playwright-report/**',
+                allowEmptyArchive: true
+            )
+
+            archiveArtifacts(
+                artifacts: 'test-results/**',
+                allowEmptyArchive: true
+            )
         }
     }
 }
